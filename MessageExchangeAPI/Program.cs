@@ -34,14 +34,15 @@ namespace MessageExchangeAPI
                 builder.Host.UseSerilog();
 
                 // Подключаем зависимости
-                string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+                string connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
 
-                // Регистрация зависимостей
                 builder.Services.AddSingleton<IMessageRepository>(provider =>
                 {
                     var logger = provider.GetRequiredService<ILogger<MessageRepository>>();
                     return new MessageRepository(connectionString, logger);
                 });
+
                 builder.Services.AddControllers();
                 builder.Services.AddEndpointsApiExplorer();
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
