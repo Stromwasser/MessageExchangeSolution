@@ -1,0 +1,60 @@
+﻿@page "/receiver"
+@using Microsoft.AspNetCore.SignalR.Client
+@using System.Collections.Generic
+@inject NavigationManager Navigation
+@inject ILogger<Receiver> Logger
+
+<h3>Receiver</h3>
+
+<ul>
+    @foreach (var msg in Enumerable.Reverse(Messages))
+    {
+        <li>@msg.CreatedAt: @msg.Text (Seq: @msg.SequenceNumber)</li>
+    }
+</ul>
+
+@code {
+    private HubConnection? hubConnection;
+    private List<MessageDTO> Messages = new List<MessageDTO>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl("https://localhost:7043/hubs/message") // Используем полный URL
+            .Build();
+
+        hubConnection.On<int, string, DateTime>("receiveMsg", (sequenceNumber, text, createdAt) =>
+        {
+            
+            Logger.LogInformation("[{Component}] [{Method}] Received message: {Text}, Sequence: {SequenceNumber}, Created At: {CreatedAt}",
+             nameof(Receiver), nameof(OnInitializedAsync), text, sequenceNumber, createdAt);
+
+
+            Messages.Add(new MessageDTO
+                {
+                    SequenceNumber = sequenceNumber,
+                    Text = text,
+                    CreatedAt = createdAt
+                });
+
+            InvokeAsync(StateHasChanged);
+        });
+
+        try
+        {
+            await hubConnection.StartAsync();
+            Logger.LogInformation("[{Component}] [{Method}] Connected to SignalR Hub", nameof(Receiver), nameof(OnInitializedAsync));
+        }
+        
+        catch (Exception ex)
+        {
+        Logger.LogError(ex, "[{Component}] [{Method}] Failed to connect to SignalR Hub", nameof(Receiver), nameof(OnInitializedAsync));
+        }
+    }
+
+    public void Dispose()
+    {
+        Logger.LogInformation("Disconnecting from SignalR Hub.");
+        _ = hubConnection?.DisposeAsync();
+    }
+}

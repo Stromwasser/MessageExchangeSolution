@@ -1,0 +1,61 @@
+﻿@page "/history"
+@using System.Net.Http.Json
+@using System.Collections.Generic
+@inject HttpClient Http
+@inject ILogger<History> Logger
+
+<h3>Message History (Last 10 Minutes)</h3>
+
+<button @onclick="LoadHistory">Show History</button>
+
+<ul>
+    @if (Messages != null && Messages.Any())
+    {
+        @foreach (var msg in Enumerable.Reverse(Messages))
+        {
+            <li>@msg.CreatedAt: @msg.Text (Seq: @msg.SequenceNumber)</li>
+        }
+    }
+    else
+    {
+        <li>No messages in the last 10 minutes.</li>
+    }
+</ul>
+
+@code {
+    private List<MessageDTO> Messages = new List<MessageDTO>();
+
+    private async Task LoadHistory()
+    {
+        Logger.LogInformation("[{Component}] [{Method}] Requesting message history for the last 10 minutes...",
+            nameof(History), nameof(LoadHistory));
+        try
+        {
+            var to = DateTime.UtcNow;
+            var from = to.AddMinutes(-10);
+            Logger.LogInformation("[{Component}] [{Method}] Start Time: {From}, End Time: {To}",
+                nameof(History), nameof(LoadHistory), from, to);
+
+            var response = await Http.GetFromJsonAsync<List<MessageDTO>>($"/api/messages/history?from={from:o}&to={to:o}");
+
+        
+        if (response != null)
+        {
+            Messages = response;
+                Logger.LogInformation("[{Component}] [{Method}] Received {MessageCount} messages.",
+                        nameof(History), nameof(LoadHistory), Messages.Count);
+        }
+        else
+        {
+                Logger.LogWarning("[{Component}] [{Method}] No messages received.",
+                        nameof(History), nameof(LoadHistory));
+        }
+    }
+    catch (Exception ex)
+    {
+            Logger.LogError(ex, "[{Component}] [{Method}] Failed to retrieve message history.",
+                nameof(History), nameof(LoadHistory));
+        }
+    }
+}
+

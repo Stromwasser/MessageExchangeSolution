@@ -1,0 +1,52 @@
+﻿@page "/sender"
+@using System.Net.Http.Json
+@using System.Collections.Generic
+@inject HttpClient Http
+@inject ILogger<Sender> Logger
+
+<h3>Sender</h3>
+
+<input @bind="MessageText" placeholder="Enter message" />
+<button @onclick="SendMessage">Send</button>
+
+<p>@StatusMessage</p>
+
+@code {
+    private string MessageText = string.Empty;
+    private string StatusMessage = string.Empty;
+
+    private async Task SendMessage()
+    {
+        var sequenceNumber = new Random().Next(1, 1000);
+        var message = new MessageDTO
+            {
+                SequenceNumber = sequenceNumber,
+                Text = MessageText,
+                CreatedAt = DateTime.UtcNow
+            };
+
+        Logger.LogInformation("Sending message with SequenceNumber: {SequenceNumber}, Text: {Text}", sequenceNumber, MessageText);
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync("/api/messages", message);
+
+            if (response.IsSuccessStatusCode)
+            {
+                StatusMessage = "Message sent!";
+                MessageText = string.Empty;
+                Logger.LogInformation("Message with SequenceNumber: {SequenceNumber} sent successfully.", sequenceNumber);
+            }
+            else
+            {
+                StatusMessage = "Failed to send message.";
+                Logger.LogWarning("Failed to send message with SequenceNumber: {SequenceNumber}. StatusCode: {StatusCode}", sequenceNumber, response.StatusCode);
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = "An error occurred while sending the message.";
+            Logger.LogError(ex, "Error while sending message with SequenceNumber: {SequenceNumber}", sequenceNumber);
+        }
+    }
+}

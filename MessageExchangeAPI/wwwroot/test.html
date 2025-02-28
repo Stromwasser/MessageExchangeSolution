@@ -1,0 +1,30 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>SignalR WebSocket Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.12/signalr.min.js"></script>
+</head>
+<body>
+    <h1>SignalR WebSocket Test</h1>
+    <ul id="messagesList"></ul>
+
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("https://localhost:7043/hubs/message")
+            .configureLogging(signalR.LogLevel.Information)
+            .build();
+
+        // Подписываемся на событие "receiveMsg"
+        connection.on("receiveMsg", (sequenceNumber, text, createdAt) => {
+            const li = document.createElement("li");
+            li.textContent = `Message: ${text}, Sequence: ${sequenceNumber}, Created At: ${createdAt}`;
+            document.getElementById("messagesList").appendChild(li);
+            console.log("New message received:", sequenceNumber, text, createdAt);
+        });
+
+        connection.start()
+            .then(() => console.log("Connected to SignalR"))
+            .catch(err => console.error("Connection error: ", err));
+    </script>
+</body>
+</html>
