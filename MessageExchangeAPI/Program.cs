@@ -1,7 +1,7 @@
-﻿using MessageExchangeDAL.Repositories;
+﻿using MessageExchangeAPI.Hubs;
+using MessageExchangeAPI.Repositories;
 using Serilog;
 using Serilog.Events;
-using MessageExchangeAPI.Hubs;
 using System.Reflection;
 
 namespace MessageExchangeAPI
@@ -17,7 +17,7 @@ namespace MessageExchangeAPI
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
                 .Enrich.FromLogContext()
                 .Enrich.WithProperty("ApplicationContext", "MessageExchangeAPI") // Добавляем контекст приложения
-               // .Enrich.WithProperty("Environment", builder.Environment.EnvironmentName) // Добавляем окружение
+                                                                                 // .Enrich.WithProperty("Environment", builder.Environment.EnvironmentName) // Добавляем окружение
                 .WriteTo.Debug()
                 .WriteTo.Console()
                 .WriteTo.File("Logs/api-log-.txt", rollingInterval: RollingInterval.Day)
@@ -33,15 +33,27 @@ namespace MessageExchangeAPI
                 // Подключаем Serilog
                 builder.Host.UseSerilog();
 
-                // Подключаем зависимости
-                string connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+                // Получаем текущее окружение (по умолчанию "Development")
+                var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
 
-                builder.Services.AddSingleton<IMessageRepository>(provider =>
-                {
-                    var logger = provider.GetRequiredService<ILogger<MessageRepository>>();
-                    return new MessageRepository(connectionString, logger);
-                });
+                // Загружаем конфигурации
+                var config = new ConfigurationBuilder()
+                    .SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                    .AddJsonFile($"appsettings.{environment}.json", optional: true) // Загружаем доп. конфигурацию
+                    .AddEnvironmentVariables()
+                    .Build();
+
+                // Получаем строку подключения
+                string connectionString = config.GetConnectionString("DefaultConnection") ??
+                    throw new InvalidOperationException("Database connection string is not set.");
+
+                builder.Services.AddScoped<IMessageRepository>(provider =>
+{
+    var logger = provider.GetRequiredService<ILogger<MessageRepository>>();
+    return new MessageRepository(connectionString, logger);
+});
+
 
                 builder.Services.AddControllers();
                 builder.Services.AddEndpointsApiExplorer();
@@ -53,16 +65,19 @@ namespace MessageExchangeAPI
                 });
 
                 builder.Services.AddSignalR();
+                var clientUrl = Environment.GetEnvironmentVariable("CLIENT_URL") ?? "https://localhost:7082";
+
                 builder.Services.AddCors(options =>
                 {
                     options.AddDefaultPolicy(builder =>
                     {
-                        builder.WithOrigins("https://localhost:7082")
+                        builder.WithOrigins(clientUrl)
                                .AllowAnyMethod()
                                .AllowAnyHeader()
-                               .AllowCredentials(); // Разрешаем отправку credentials
+                               .AllowCredentials();
                     });
                 });
+
                 builder.Services.AddHttpClient("MessageExchangeClient", client =>
                 {
                     client.BaseAddress = new Uri("https://localhost:7043/");
@@ -76,7 +91,7 @@ namespace MessageExchangeAPI
                 }
                 app.UseStaticFiles();
                 app.UseCors();
-            //    app.UseHttpsRedirection();
+                //    app.UseHttpsRedirection();
                 app.UseAuthorization();
 
                 app.MapControllers();

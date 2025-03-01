@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace MessageExchangeDAL.Models
+namespace MessageExchangeAPI.Models
 {
     
     /// <summary>
@@ -13,7 +13,7 @@ namespace MessageExchangeDAL.Models
         public int SequenceNumber { get; set; }
 
         /// <summary>Текст сообщения</summary>
-        public string Text { get; set; }
+        public string Text { get; set; } = string.Empty;
 
         /// <summary>Дата и время создания сообщения</summary>
         public DateTime CreatedAt { get; set; }

@@ -1,9 +1,9 @@
-﻿using MessageExchangeDAL.Models;
+﻿using MessageExchangeAPI.Models;
 using Npgsql;
 using System.Data;
 using Microsoft.Extensions.Logging;
 
-namespace MessageExchangeDAL.Repositories
+namespace MessageExchangeAPI.Repositories
 {
     public class MessageRepository : IMessageRepository
     {

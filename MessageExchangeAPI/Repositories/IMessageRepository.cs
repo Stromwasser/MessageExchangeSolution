@@ -1,11 +1,11 @@
-﻿using MessageExchangeDAL.Models;
+﻿using MessageExchangeAPI.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MessageExchangeDAL.Repositories
+namespace MessageExchangeAPI.Repositories
 {
     public interface IMessageRepository
     {

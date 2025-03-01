@@ -1,12 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MessageExchangeAPI.Hubs;
+using MessageExchangeAPI.Models;
+using MessageExchangeAPI.Repositories;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using MessageExchangeAPI.Hubs;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using MessageExchangeDAL.Models;
-using MessageExchangeDAL.Repositories;
 
 namespace MessageExchangeAPI.Controllers
 {
@@ -74,20 +70,24 @@ namespace MessageExchangeAPI.Controllers
         }
 
         /// <summary>
-        /// Получает список за последние 10 минут
+        /// Получает список за последние 10 минут (по умолчанию) или за выбранный диапазон времени
         /// </summary>
         /// <returns>Список сообщений</returns>
         [HttpGet("history")]
-        public async Task<IActionResult> GetHistory([FromQuery] DateTime from, [FromQuery] DateTime to)
+        public async Task<IActionResult> GetHistory([FromQuery] DateTime? from, [FromQuery] DateTime? to)
         {
-            var messages = await _messageRepository.GetMessagesByDateRangeAsync(from, to);
-            // Сортируем в порядке времени прихода
-            var orderedMessages = messages.OrderBy(m => m.CreatedAt).ToList();
-            return Ok(orderedMessages);
+            // Если параметры не переданы, автоматически подставляем последние 10 минут
+            var startTime = from ?? DateTime.UtcNow.AddMinutes(-10);
+            var endTime = to ?? DateTime.UtcNow;
+
+            var messages = await _messageRepository.GetMessagesByDateRangeAsync(startTime, endTime);
+
+            return Ok(messages);
         }
 
 
 
-        
+
+
     }
 }
