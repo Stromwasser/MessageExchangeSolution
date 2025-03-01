@@ -71,16 +71,21 @@ namespace MessageExchangeAPI
                 {
                     options.AddDefaultPolicy(builder =>
                     {
-                        builder.WithOrigins(clientUrl)
+                        builder.WithOrigins(clientUrl,
+                            "https://localhost:5220",
+                            "http://localhost:5220", 
+                            "http://localhost:7082",
+                            "http://messageexchangeclient:80")
                                .AllowAnyMethod()
                                .AllowAnyHeader()
-                               .AllowCredentials();
+                               .AllowCredentials()
+                               .SetIsOriginAllowed(origin => true);
                     });
                 });
 
                 builder.Services.AddHttpClient("MessageExchangeClient", client =>
                 {
-                    client.BaseAddress = new Uri("https://localhost:7043/");
+                    client.BaseAddress = new Uri("http://localhost:7043/");
                 });
                 var app = builder.Build();
 
