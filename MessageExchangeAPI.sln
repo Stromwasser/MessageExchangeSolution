@@ -5,7 +5,7 @@ VisualStudioVersion = 17.13.35806.99
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageExchangeAPI", "MessageExchangeAPI\MessageExchangeAPI.csproj", "{BBE382B9-42E7-845E-9E5D-63C4A1B27059}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageExchangeClient", "MessagefExchangeClient\MessageExchangeClient.csproj", "{0A739631-3D77-18FB-438F-FE8B6DFD4982}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageExchangeClient", "MessageExchangeClient\MessageExchangeClient.csproj", "{0A739631-3D77-18FB-438F-FE8B6DFD4982}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

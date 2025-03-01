@@ -1,0 +1,31 @@
+
+services:
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: MessageExchangeDB
+    ports:
+      - "5432:5432"
+
+  api:
+    build: .
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - API_URL=http://messageexchangeapi:8080
+      - CLIENT_URL=http://messageexchangeclient:80
+      - DB_CONNECTION_STRING=Host=postgres;Port=5432;Database=MessageExchangeDB;Username=postgres;Password=postgres
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+
+  client:
+    build: .
+    environment:
+      - API_URL=http://messageexchangeapi:8080
+    depends_on:
+      - api
+    ports:
+      - "7082:80"
