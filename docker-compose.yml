@@ -1,31 +1,47 @@
-
 services:
-  postgres:
-    image: postgres:latest
+  db:
+    image: postgres:15
+    container_name: postgres
+    restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: MessageExchangeDB
     ports:
       - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./MessageExchangeAPI/init.sql:/docker-entrypoint-initdb.d/init.sql  # Исправлено!
 
   api:
-    build: .
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - API_URL=http://messageexchangeapi:8080
-      - CLIENT_URL=http://messageexchangeclient:80
-      - DB_CONNECTION_STRING=Host=postgres;Port=5432;Database=MessageExchangeDB;Username=postgres;Password=postgres
-    ports:
-      - "8080:8080"
+    build:
+      context: .
+      dockerfile: MessageExchangeAPI/Dockerfile
+    container_name: messageexchange_api
     depends_on:
-      - postgres
+      - db
+    restart: always
+    environment:
+      ASPNETCORE_URLS: "http://+:7043"
+      DB_CONNECTION_STRING: "Host=postgres;Port=5432;Database=MessageExchangeDB;Username=postgres;Password=postgres"
+      CLIENT_URL: "http://messageexchange_client"
+    ports:
+      - "7043:7043"
 
   client:
-    build: .
-    environment:
-      - API_URL=http://messageexchangeapi:8080
+    build:
+      context: .
+      dockerfile: MessageExchangeClient/Dockerfile
+    container_name: messageexchange_client
     depends_on:
       - api
+    restart: always
+    environment:
+      API_URL: "http://messageexchange_api:7043"  # Исправлен отступ!
     ports:
-      - "7082:80"
+      - "7080:80"
+    volumes:
+      - ./MessageExchangeClient/nginx.conf:/etc/nginx/nginx.conf:ro
+
+volumes:
+  pgdata:

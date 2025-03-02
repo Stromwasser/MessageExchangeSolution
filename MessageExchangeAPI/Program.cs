@@ -32,7 +32,8 @@ namespace MessageExchangeAPI
 
                 // Подключаем Serilog
                 builder.Host.UseSerilog();
-
+                var port = Environment.GetEnvironmentVariable("API_PORT") ?? "7043";
+                builder.WebHost.UseUrls($"http://+:{port}");
                 // Получаем текущее окружение (по умолчанию "Development")
                 var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
 
@@ -45,8 +46,10 @@ namespace MessageExchangeAPI
                     .Build();
 
                 // Получаем строку подключения
-                string connectionString = config.GetConnectionString("DefaultConnection") ??
-                    throw new InvalidOperationException("Database connection string is not set.");
+                string connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? Environment.GetEnvironmentVariable("DB_CONNECTION_STRING")
+    ?? throw new InvalidOperationException("Database connection string is not set.");
+
 
                 builder.Services.AddScoped<IMessageRepository>(provider =>
 {
@@ -65,21 +68,23 @@ namespace MessageExchangeAPI
                 });
 
                 builder.Services.AddSignalR();
-                var clientUrl = Environment.GetEnvironmentVariable("CLIENT_URL") ?? "https://localhost:7082";
+                var clientUrl = Environment.GetEnvironmentVariable("CLIENT_URL") ?? "http://localhost:7082";
 
                 builder.Services.AddCors(options =>
                 {
                     options.AddDefaultPolicy(builder =>
                     {
                         builder.WithOrigins(clientUrl,
-                            "https://localhost:5220",
-                            "http://localhost:5220", 
-                            "http://localhost:7082",
-                            "http://messageexchangeclient:80")
-                               .AllowAnyMethod()
-                               .AllowAnyHeader()
-                               .AllowCredentials()
-                               .SetIsOriginAllowed(origin => true);
+    "https://localhost:5220",
+    "http://localhost:5220",
+    "http://localhost:7082",
+    "http://messageexchange_client",
+    "http://messageexchange_api:7043")  // ✅ Добавили API в контейнере
+   .AllowAnyMethod()
+   .AllowAnyHeader()
+   .AllowCredentials()
+   .SetIsOriginAllowed(origin => true);
+
                     });
                 });
 
@@ -87,9 +92,13 @@ namespace MessageExchangeAPI
                 {
                     client.BaseAddress = new Uri("http://localhost:7043/");
                 });
+
+                // Читаем порт из переменной окружения или используем 7043 по умолчанию
+               
+
                 var app = builder.Build();
 
-                if (app.Environment.IsDevelopment())
+                if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
                 {
                     app.UseSwagger();
                     app.UseSwaggerUI();

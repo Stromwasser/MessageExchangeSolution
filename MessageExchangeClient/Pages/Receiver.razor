@@ -3,7 +3,7 @@
 @using System.Collections.Generic
 @inject NavigationManager Navigation
 @inject ILogger<Receiver> Logger
-
+@inject IConfiguration Configuration
 <h3>Receiver</h3>
 
 <ul>
@@ -19,10 +19,14 @@
 
     protected override async Task OnInitializedAsync()
     {
-        hubConnection = new HubConnectionBuilder()
-            .WithUrl("http://localhost:7043/hubs/message") // Используем полный URL
-            .Build();
+        var apiUrl = Configuration["API_URL"] ?? "http://localhost:7043";
 
+        Console.WriteLine($"[DEBUG] API URL: {apiUrl}");
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl($"{apiUrl}/hubs/message")
+            .WithAutomaticReconnect()
+            .Build();
+        Console.WriteLine("[DEBUG] Hub connection initialized.");
         hubConnection.On<int, string, DateTime>("receiveMsg", (sequenceNumber, text, createdAt) =>
         {
             

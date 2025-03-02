@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>MessageExchangeAPI</name>
+    </assembly>
+    <members>
+        <member name="M:MessageExchangeAPI.Controllers.MessagesController.PostMessage(MessageExchangeAPI.Models.MessageDTO)">
+            <summary>
+            Получает сообщение от клиента и отправляет через SignalR
+            </summary>
+            <param name="message">MessageDTO с текстом и порядковым номером</param>
+            <returns>HTTP-статус</returns>
+        </member>
+        <member name="M:MessageExchangeAPI.Controllers.MessagesController.GetHistory(System.Nullable{System.DateTime},System.Nullable{System.DateTime})">
+            <summary>
+            Получает список за последние 10 минут (по умолчанию) или за выбранный диапазон времени
+            </summary>
+            <returns>Список сообщений</returns>
+        </member>
+        <member name="T:MessageExchangeAPI.Models.MessageDTO">
+            <summary>
+            Представляет сообщение для обмена
+            </summary>
+        </member>
+        <member name="P:MessageExchangeAPI.Models.MessageDTO.SequenceNumber">
+            <summary>Порядковый номер сообщения</summary>
+        </member>
+        <member name="P:MessageExchangeAPI.Models.MessageDTO.Text">
+            <summary>Текст сообщения</summary>
+        </member>
+        <member name="P:MessageExchangeAPI.Models.MessageDTO.CreatedAt">
+            <summary>Дата и время создания сообщения</summary>
+        </member>
+    </members>
+</doc>

@@ -16,8 +16,9 @@ public class Program
         var config = await http.GetFromJsonAsync<AppConfig>("appsettings.json");
 
         // ????????????? API URL
-        var apiBaseUrl = config?.ApiBaseUrl ?? "http://localhost:7043";
+        var apiBaseUrl = Environment.GetEnvironmentVariable("API_URL") ?? "http://localhost:7043";
         builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiBaseUrl) });
+
 
         await builder.Build().RunAsync();
 

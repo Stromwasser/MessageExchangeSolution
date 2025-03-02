@@ -7,8 +7,6 @@
     <title>MessageExchangeClient</title>
     <base href="/" />
     <link rel="stylesheet" href="css/app.css" />
-    <!-- If you add any scoped CSS files, uncomment the following to load them
-    <link href="MessageExchangeClient.styles.css" rel="stylesheet" /> -->
 </head>
 
 <body>
@@ -25,7 +23,15 @@
         <a href="" class="reload">Reload</a>
         <a class="dismiss">🗙</a>
     </div>
+
+    <!-- ✅ Подключаем SignalR перед Blazor -->
+
+
     <script src="_framework/blazor.webassembly.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.2/signalr.min.js"></script>
+    <script>
+        console.log("SignalR loaded:", window.signalR);
+    </script>
 </body>
 
 </html>
