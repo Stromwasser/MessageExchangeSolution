@@ -36,10 +36,28 @@ npm-cache/
 yarn.lock
 package-lock.json
 
-# Rider / JetBrains IDE (если вдруг используешь)
+# JetBrains Rider (если вдруг используешь)
 .idea/
 
 # MacOS system files (если работаешь на Mac)
 .DS_Store
 
+# Windows Installer files
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
 
+# ReSharper
+_ReSharper*/
+*.DotSettings.user
+
+# Visual Studio profiler
+*.psess
+*.vsp
+*.vspx
+*.sap
+
+# Build artifacts
+artifacts/
