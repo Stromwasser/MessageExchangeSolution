@@ -3,15 +3,8 @@ services:
     image: ghcr.io/stromwasser/messageexchangesolution-db:latest
     container_name: messageexchange_db
     restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: MessageExchangeDB
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-      - ./MessageExchangeAPI/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - app_network
 
   api:
     image: ghcr.io/stromwasser/messageexchangesolution-api:latest
@@ -21,9 +14,11 @@ services:
     restart: always
     environment:
       ASPNETCORE_URLS: "http://+:7043"
-      DB_CONNECTION_STRING: "Host=messageexchange_db;Port=5432;Database=MessageExchangeDB;Username=postgres;Password=postgres"
+      DB_CONNECTION_STRING: "Host=db;Port=5432;Database=MessageExchangeDB;Username=postgres;Password=postgres"
     ports:
       - "7043:7043"
+    networks:
+      - app_network
 
   client:
     image: ghcr.io/stromwasser/messageexchangesolution-client:latest
@@ -33,6 +28,8 @@ services:
     restart: always
     ports:
       - "7080:80"
+    networks:
+      - app_network
 
-volumes:
-  pgdata:
+networks:
+  app_network:
