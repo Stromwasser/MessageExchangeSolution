@@ -1,7 +1,7 @@
 services:
   db:
-    image: postgres:15
-    container_name: postgres
+    image: ghcr.io/stromwasser/messageexchangesolution-db:latest
+    container_name: messageexchange_db
     restart: always
     environment:
       POSTGRES_USER: postgres
@@ -11,37 +11,27 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./MessageExchangeAPI/init.sql:/docker-entrypoint-initdb.d/init.sql  # Исправлено!
 
   api:
-    build:
-      context: .
-      dockerfile: MessageExchangeAPI/Dockerfile
+    image: ghcr.io/stromwasser/messageexchangesolution-api:latest
     container_name: messageexchange_api
     depends_on:
       - db
     restart: always
     environment:
       ASPNETCORE_URLS: "http://+:7043"
-      DB_CONNECTION_STRING: "Host=postgres;Port=5432;Database=MessageExchangeDB;Username=postgres;Password=postgres"
-      CLIENT_URL: "http://messageexchange_client"
+      DB_CONNECTION_STRING: "Host=messageexchange_db;Port=5432;Database=MessageExchangeDB;Username=postgres;Password=postgres"
     ports:
       - "7043:7043"
 
   client:
-    build:
-      context: .
-      dockerfile: MessageExchangeClient/Dockerfile
+    image: ghcr.io/stromwasser/messageexchangesolution-client:latest
     container_name: messageexchange_client
     depends_on:
       - api
     restart: always
-    environment:
-      API_URL: "http://messageexchange_api:7043"  # Исправлен отступ!
     ports:
       - "7080:80"
-    volumes:
-      - ./MessageExchangeClient/nginx.conf:/etc/nginx/nginx.conf:ro
 
 volumes:
   pgdata:
