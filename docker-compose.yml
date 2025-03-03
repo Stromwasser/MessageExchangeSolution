@@ -5,12 +5,18 @@ services:
     restart: always
     networks:
       - app_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d MessageExchangeDB"]
+      interval: 5s
+      retries: 5
+      start_period: 10s
 
   api:
     image: ghcr.io/stromwasser/messageexchangesolution-api:latest
     container_name: messageexchange_api
     depends_on:
-      - db
+      db:
+        condition: service_healthy  # API запустится только после того, как база будет готова
     restart: always
     environment:
       ASPNETCORE_URLS: "http://+:7043"
