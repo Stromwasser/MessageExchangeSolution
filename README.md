@@ -27,7 +27,7 @@ After running the system, open the following links in your browser:
 
 
 
-🔍 4. How to Check Logs?
+### 🔍 4. How to Check Logs?
 📌 API Logs
 The API logs are saved inside the container in dated log files (Logs/api-log-YYYYMMDD.txt).
 
@@ -42,7 +42,7 @@ If you want real-time API logs, use:
 ```sh
 docker logs -f messageexchange_api
 ```
-🔄 Stopping and Restarting the System
+### 🔄 5. Stopping and Restarting the System
 To stop the system:
 ```sh
 docker-compose down
