@@ -14,7 +14,7 @@ git clone https://github.com/Stromwasser/MessageExchangeSolution.git
 cd MessageExchangeSolution
 docker-compose up -d
 ```
-✅ 3. Check if the Project is Running
+### ✅ 3. Check if the Project is Running
 After running the system, open the following links in your browser:
 
 🔹 Swagger API Documentation:
