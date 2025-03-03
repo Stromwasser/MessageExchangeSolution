@@ -10,7 +10,7 @@
    git clone https://github.com/Stromwasser/MessageExchangeSolution.git
    cd MessageExchangeSolution
    docker-compose up -d
-3️⃣ Проверьте, что проект работает:
+3️⃣ **Проверьте, что проект работает:
 
 Swagger API: http://localhost:7043/swagger
 Клиент: http://localhost:7080
